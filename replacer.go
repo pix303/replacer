@@ -113,3 +113,50 @@ func execSnakeCase(rootDir string) {
 		fmt.Println("error walking on ", rootDir)
 	}
 }
+
+func execCamelCase(rootDir string) error {
+	err := filepath.Walk(rootDir, func(filename string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		fInfo, err := os.Stat(rootDir)
+		if err != nil {
+			return err
+		}
+
+		basePath := rootDir
+		if !fInfo.IsDir() {
+			basePath = filepath.Dir(rootDir)
+		}
+
+		newName := ""
+		nextUpper := false
+		for _, v := range info.Name() {
+			if v == '_' {
+				nextUpper = true
+				continue
+			}
+
+			if nextUpper {
+				newName += string(unicode.ToUpper(v))
+				nextUpper = false
+			} else {
+				newName += string(v)
+			}
+		}
+
+		err = os.Rename(filename, basePath+string(os.PathSeparator)+newName)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	return err
+}

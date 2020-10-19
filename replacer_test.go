@@ -289,3 +289,25 @@ func TestExecSnakeAllFolder(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestExecCamelCase(t *testing.T) {
+	fn, _ := os.Getwd()
+	fn += string(os.PathSeparator) + "main_application.go"
+	file, err := os.Create(fn)
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = execCamelCase(file.Name())
+	if err != nil {
+		t.Error(err)
+	}
+
+	newFn, _ := os.Getwd()
+	newFn += string(os.PathSeparator) + "mainApplication.go"
+	if _, err := os.Stat(newFn); os.IsNotExist(err) {
+		t.Errorf("file not exists after change extension")
+	}
+
+	os.Remove(newFn)
+}
